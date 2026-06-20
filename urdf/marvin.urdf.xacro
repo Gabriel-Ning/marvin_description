@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!-- Canonical Marvin bimanual arm-only entrypoint.
+
+     Args:
+       connected_to         Parent link for the base mount (default: world)
+       xyz                  Translation offset from connected_to
+       rpy                  Rotation offset from connected_to
+       ros2_control         Whether to include the <ros2_control> block
+       use_fake_hardware    Use mock_components/GenericSystem (true) or real plugin
+       hardware_plugin      Real ros2_control hardware plugin name
+       robot_ip             Marvin controller IP address
+
+     Output tree:
+       world -> base_link -> column_link, tracking_base_link,
+                Base_L -> ... -> Link7_L -> flange_L,
+                Base_R -> ... -> Link7_R -> flange_R -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="marvin">
+
+  <xacro:arg name="connected_to" default="world"/>
+  <xacro:arg name="xyz" default="0 0 0"/>
+  <xacro:arg name="rpy" default="0 0 0"/>
+  <xacro:arg name="ros2_control" default="true"/>
+  <xacro:arg name="use_fake_hardware" default="true"/>
+  <xacro:arg name="hardware_plugin" default="marvin_hardware_interface/MarvinBimanualArmHardware"/>
+  <xacro:arg name="robot_ip" default="10.19.0.191"/>
+
+  <!-- Includes -->
+  <xacro:include filename="$(find marvin_description)/urdf/parts/marvin_stand.xacro"/>
+  <xacro:include filename="$(find marvin_description)/urdf/parts/marvin_bimanual_arm.xacro"/>
+  <xacro:include filename="$(find marvin_description)/urdf/parts/marvin_arm.ros2_control.xacro"/>
+
+  <!-- Stand (base_link, column_link, tracking_base_link) -->
+  <xacro:marvin_stand/>
+
+  <!-- Bimanual arm (left + right arms with their mounting joints).
+       flange_L / flange_R are the native arm end frames; no separate tool
+       frames are added at this stage. -->
+  <xacro:marvin_bimanual_arm
+    connected_to="$(arg connected_to)"
+    xyz="$(arg xyz)"
+    rpy="$(arg rpy)"/>
+
+  <!-- ros2_control block (conditional) -->
+  <xacro:if value="$(arg ros2_control)">
+    <xacro:marvin_arm_ros2_control
+      use_fake_hardware="$(arg use_fake_hardware)"
+      hardware_plugin="$(arg hardware_plugin)"
+      robot_ip="$(arg robot_ip)"/>
+  </xacro:if>
+
+</robot>

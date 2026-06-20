@@ -1,0 +1,96 @@
+# Copyright 2026
+# SPDX-License-Identifier: Apache-2.0
+"""Marvin description-only RViz visualization launch.
+
+Starts robot_state_publisher, joint_state_publisher (or gui), and RViz2.
+No ros2_control, no hardware, no controllers.
+"""
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchContext, LaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+import xacro
+
+
+def robot_state_publisher_spawner(context: LaunchContext):
+    share = get_package_share_directory("marvin_description")
+
+    connected_to = LaunchConfiguration("connected_to")
+    xyz = LaunchConfiguration("xyz")
+    rpy = LaunchConfiguration("rpy")
+    use_joint_state_gui = LaunchConfiguration("use_joint_state_gui")
+    joint_states_topic = LaunchConfiguration("joint_states_topic")
+
+    base_xacro = str(PathJoinSubstitution([share, "urdf", "marvin.urdf.xacro"]).perform(context))
+
+    mappings = {
+        "connected_to": context.perform_substitution(connected_to),
+        "xyz": context.perform_substitution(xyz),
+        "rpy": context.perform_substitution(rpy),
+        "ros2_control": "false",
+        "use_fake_hardware": "true",
+    }
+
+    robot_description = xacro.process_file(base_xacro, mappings=mappings).toprettyxml(indent="  ")
+
+    return [
+        Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            name="robot_state_publisher",
+            output="screen",
+            parameters=[{"robot_description": robot_description}],
+            remappings=[("joint_states", joint_states_topic)],
+        ),
+        Node(
+            package="joint_state_publisher_gui",
+            executable="joint_state_publisher_gui",
+            name="joint_state_publisher_gui",
+            condition=IfCondition(use_joint_state_gui),
+            parameters=[{"robot_description": robot_description}],
+            remappings=[("joint_states", joint_states_topic)],
+        ),
+        Node(
+            package="joint_state_publisher",
+            executable="joint_state_publisher",
+            name="joint_state_publisher",
+            condition=UnlessCondition(use_joint_state_gui),
+            parameters=[{"robot_description": robot_description}],
+            remappings=[("joint_states", joint_states_topic)],
+        ),
+    ]
+
+
+def generate_launch_description() -> LaunchDescription:
+    share = get_package_share_directory("marvin_description")
+    use_rviz = LaunchConfiguration("use_rviz")
+    rviz_config = PathJoinSubstitution([share, "urdf", "rviz2.rviz"])
+
+    robot_state_publisher_spawner_opaque_function = OpaqueFunction(
+        function=robot_state_publisher_spawner
+    )
+
+    rviz = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        arguments=["--display-config", rviz_config],
+        condition=IfCondition(use_rviz),
+    )
+
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument("connected_to", default_value="world"),
+            DeclareLaunchArgument("xyz", default_value="0 0 0"),
+            DeclareLaunchArgument("rpy", default_value="0 0 0"),
+            DeclareLaunchArgument("use_joint_state_gui", default_value="true"),
+            DeclareLaunchArgument("use_rviz", default_value="true"),
+            DeclareLaunchArgument(
+                "joint_states_topic", default_value="/marvin_description/joint_states"
+            ),
+            robot_state_publisher_spawner_opaque_function,
+            rviz,
+        ]
+    )
