@@ -28,21 +28,28 @@ Deferred modules:
 
 ```text
 marvin_description/
+  config/
+    arm_mounts.yaml
+    inertials.yaml
+    joint_limits.yaml
+    kinematics.yaml
   launch/
     visualize_marvin.launch.py
   meshes/
     base/
     m6/
+  rviz/
+    visualize_marvin.rviz
+  test/
+    test_marvin_description.py
   urdf/
     marvin.urdf.xacro
-    marvin_with_gripper.urdf.xacro
     parts/
       marvin_stand.xacro
       marvin_left_arm.xacro
       marvin_right_arm.xacro
       marvin_bimanual_arm.xacro
       marvin_arm.ros2_control.xacro
-    rviz2.rviz
 ```
 
 ## Xacro Entry Point
@@ -55,10 +62,23 @@ Supported arguments:
 connected_to:=world
 xyz:=0 0 0
 rpy:=0 0 0
+mounts_file:=$(find marvin_description)/config/arm_mounts.yaml
 ros2_control:=true
 use_fake_hardware:=true
 hardware_plugin:=marvin_hardware_interface/MarvinBimanualArmHardware
 ```
+
+`config/arm_mounts.yaml` is the canonical calibration source for the fixed
+`base_link -> Base_L` and `base_link -> Base_R` transforms. Translation values
+are metres and RPY values are radians. The individual `left_base_*` and
+`right_base_*` xacro arguments remain available for explicit one-off overrides.
+
+The native M6 arm parameters are separated by responsibility:
+
+- `config/kinematics.yaml`: joint and flange origins plus joint axes.
+- `config/joint_limits.yaml`: position, velocity, and effort limits.
+- `config/inertials.yaml`: CAD center of mass, mass, and inertia tensors,
+  including the mirrored left/right Link5 and Link6 values.
 
 The expected tree is:
 
@@ -82,14 +102,9 @@ Command interfaces:
 
 ```text
 position
-velocity
-effort
 ```
 
-The current validated controller path is position-only JointTrajectoryController
-usage. `velocity` and `effort` command interfaces are reserved for future
-controllers. The hardware mode-switch contract rejects claims for them until
-their corresponding write modes are implemented.
+The validated hardware command path is position-only.
 
 State interfaces:
 

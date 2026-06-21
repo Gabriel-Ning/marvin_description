@@ -8,9 +8,9 @@ if(BUILD_TESTING)
   ament_add_pytest_test(test_marvin_description test/test_marvin_description.py)
 endif()
 
-install(DIRECTORY urdf DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config urdf DESTINATION share/${PROJECT_NAME})
 install(
-  DIRECTORY launch
+  DIRECTORY launch rviz
   DESTINATION share/${PROJECT_NAME}
   PATTERN "__pycache__" EXCLUDE
   PATTERN "*.pyc" EXCLUDE

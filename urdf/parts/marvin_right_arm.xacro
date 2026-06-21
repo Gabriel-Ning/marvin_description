@@ -5,7 +5,7 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="marvin_right_arm"
-    params="parent:=base_link xyz:='0 -0.037 0.140' rpy:='1.57 0 0' description_pkg:=marvin_description">
+    params="parent:=base_link xyz:='0 0 0' rpy:='0 0 0' description_pkg:=marvin_description">
 
     <!-- Mounting joint from parent (typically base_link) to Base_R -->
     <joint name="base_to_right_arm" type="fixed">
@@ -16,20 +16,7 @@
 
     <link
       name="Base_R">
-      <inertial>
-        <origin
-          xyz="0.00032267 4.798E-05 0.04066353"
-          rpy="0 0 0" />
-        <mass
-          value="1.1962" />
-        <inertia
-          ixx="0.00107329"
-          ixy="-1.68E-06"
-          ixz="-1.05E-05"
-          iyy="0.00107003"
-          iyz="-3.43E-06"
-          izz="0.00127315" />
-      </inertial>
+      <xacro:marvin_link_inertial key="base"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -54,20 +41,7 @@
     </link>
     <link
       name="Link1_R">
-      <inertial>
-        <origin
-          xyz="0.00002347 0.00557150 -0.03075998"
-          rpy="0 0 0" />
-        <mass
-          value="1.9705" />
-        <inertia
-          ixx="0.00492293"
-          ixy="0.00000550"
-          ixz="0.00000193"
-          iyy="0.00526513"
-          iyz="0.00033232"
-          izz="0.00188107" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link1"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -93,37 +67,18 @@
     <joint
       name="Joint1_R"
       type="revolute">
-      <origin
-        xyz="0 0 0.1745"
-        rpy="0 0 0" />
+      <xacro:marvin_joint_parameters key="joint1"/>
+
       <parent
         link="Base_R" />
       <child
         link="Link1_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-2.9671"
-        upper="2.9671"
-        effort="108"
-        velocity="3.1416" />
+
+
     </joint>
     <link
       name="Link2_R">
-      <inertial>
-        <origin
-          xyz="0.00013483 0.06170460 0.00950639"
-          rpy="0 0 0" />
-        <mass
-          value="2.24398" />
-        <inertia
-          ixx="0.01194933"
-          ixy="0.00000336"
-          ixz="0.00000091"
-          iyy="0.00361581"
-          iyz="-0.00132804"
-          izz="0.01098356" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link2"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -149,37 +104,18 @@
     <joint
       name="Joint2_R"
       type="revolute">
-      <origin
-        xyz="0 0 0"
-        rpy="1.5708 0 0" />
+      <xacro:marvin_joint_parameters key="joint2"/>
+
       <parent
         link="Link1_R" />
       <child
         link="Link2_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-2.0944"
-        upper="2.0944"
-        effort="108"
-        velocity="3.1416" />
+
+
     </joint>
     <link
       name="Link3_R">
-      <inertial>
-        <origin
-          xyz="0.00968562 0.00246599 -0.04627302"
-          rpy="0 0 0" />
-        <mass
-          value="1.9242" />
-        <inertia
-          ixx="0.00718224"
-          ixy="0.00004413"
-          ixz="0.00089552"
-          iyy="0.00762563"
-          iyz="0.00022096"
-          izz="0.00178597" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link3"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -203,37 +139,18 @@
     <joint
       name="Joint3_R"
       type="revolute">
-      <origin
-        xyz="0 0.287 0"
-        rpy="-1.5708 0 0" />
+      <xacro:marvin_joint_parameters key="joint3"/>
+
       <parent
         link="Link2_R" />
       <child
         link="Link3_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-2.9671"
-        upper="2.9671"
-        effort="66"
-        velocity="3.1416" />
+
+
     </joint>
     <link
       name="Link4_R">
-      <inertial>
-        <origin
-          xyz="0.00850411 -0.04718223 0.00941509"
-          rpy="0 0 0" />
-        <mass
-          value="1.6085" />
-        <inertia
-          ixx="0.00580480"
-          ixy="-0.00066669"
-          ixz="-0.00012722"
-          iyy="0.00223807"
-          iyz="0.00070523"
-          izz="0.00533060" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link4"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -257,37 +174,18 @@
     <joint
       name="Joint4_R"
       type="revolute">
-      <origin
-        xyz="0.018 0 0"
-        rpy="-1.5708 0 3.1416" />
+      <xacro:marvin_joint_parameters key="joint4"/>
+
       <parent
         link="Link3_R" />
       <child
         link="Link4_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-2.5307"
-        upper="1.0472"
-        effort="66"
-        velocity="3.1416" />
+
+
     </joint>
     <link
       name="Link5_R">
-      <inertial>
-        <origin
-          xyz="-0.00051127 -0.00101064 -0.11271739"
-          rpy="0 0 0" />
-        <mass
-          value="2.0883" />
-        <inertia
-          ixx="0.00626603"
-          ixy="0.00004009"
-          ixz="-0.00005338"
-          iyy="0.00564387"
-          iyz="0.00006193"
-          izz="0.00243632" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link5_right"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -311,37 +209,18 @@
     <joint
       name="Joint5_R"
       type="revolute">
-      <origin
-        xyz="0.018 -0.314 0"
-        rpy="-1.5708 0 3.1416" />
+      <xacro:marvin_joint_parameters key="joint5"/>
+
       <parent
         link="Link4_R" />
       <child
         link="Link5_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-2.9671"
-        upper="2.9671"
-        effort="18"
-        velocity="3.1416" />
+
+
     </joint>
     <link
       name="Link6_R">
-      <inertial>
-        <origin
-          xyz="0.00032659 -0.00531336 0.00030182"
-          rpy="0 0 0" />
-        <mass
-          value="0.72496" />
-        <inertia
-          ixx="0.00046040"
-          ixy="-0.00000189"
-          ixz="-0.00000083"
-          iyy="0.00051716"
-          iyz="-0.00000346"
-          izz="0.00042521" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link6_right"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -365,37 +244,18 @@
     <joint
       name="Joint6_R"
       type="revolute">
-      <origin
-        xyz="0 0 0"
-        rpy="1.5708 -1.5708 0" />
+      <xacro:marvin_joint_parameters key="joint6"/>
+
       <parent
         link="Link5_R" />
       <child
         link="Link6_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-1.0472"
-        upper="1.0472"
-        effort="18"
-        velocity="3.1416" />
+
+
     </joint>
     <link
       name="Link7_R">
-      <inertial>
-        <origin
-          xyz="-0.00009108 -0.03153255 0.00889371"
-          rpy="0 0 0" />
-        <mass
-          value="0.68606" />
-        <inertia
-          ixx="0.00173687"
-          ixy="-0.00000345"
-          ixz="-0.00000116"
-          iyy="0.00089035"
-          iyz="0.00030680"
-          izz="0.00139406" />
-      </inertial>
+      <xacro:marvin_link_inertial key="link7"/>
       <visual>
         <origin
           xyz="0 0 0"
@@ -419,24 +279,20 @@
     <joint
       name="Joint7_R"
       type="revolute">
-      <origin
-        xyz="0 0 0"
-        rpy="1.5708 -1.5708 0" />
+      <xacro:marvin_joint_parameters key="joint7"/>
+
       <parent
         link="Link6_R" />
       <child
         link="Link7_R" />
-      <axis
-        xyz="0 0 1" />
-      <limit
-        lower="-1.5708"
-        upper="1.5708"
-        effort="18"
-        velocity="3.1416" />
+
+
     </joint>
     <link name="flange_R"/>
     <joint name="joint_flange_R" type="fixed">
-      <origin xyz="0.0 -0.095 0.0" rpy="1.5708 -1.5708 0" />
+      <origin
+        xyz="${marvin_kinematics['flange']['origin']['xyz']}"
+        rpy="${marvin_kinematics['flange']['origin']['rpy']}"/>
       <parent link="Link7_R" />
       <child link="flange_R" />
     </joint>

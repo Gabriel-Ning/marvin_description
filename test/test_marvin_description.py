@@ -8,9 +8,9 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1]
 XACRO = SOURCE_ROOT / "urdf" / "marvin.urdf.xacro"
 
 
-def _expand_robot():
+def _expand_robot(*xacro_args):
     result = subprocess.run(
-        ["xacro", str(XACRO), "ros2_control:=true", "use_fake_hardware:=true"],
+        ["xacro", str(XACRO), "ros2_control:=true", "use_fake_hardware:=true", *xacro_args],
         check=True,
         capture_output=True,
         text=True,
@@ -106,8 +106,49 @@ def test_arm_only_tree_and_control_contract():
     assert {"camera_link", "left_tool", "right_tool"}.isdisjoint(links)
     assert len(control.findall("joint")) == 14
     assert len(control.findall(".//command_interface[@name='position']")) == 14
-    assert len(control.findall(".//command_interface[@name='velocity']")) == 14
-    assert len(control.findall(".//command_interface[@name='effort']")) == 14
+    assert len(control.findall(".//command_interface")) == 14
+
+
+def test_arm_mount_transforms_are_configurable():
+    root = _expand_robot(
+        "left_base_xyz:=0.1 0.2 0.3",
+        "left_base_rpy:=0.01 0.02 0.03",
+        "right_base_xyz:=-0.1 -0.2 -0.3",
+        "right_base_rpy:=-0.01 -0.02 -0.03",
+    )
+    joints = {joint.get("name"): joint for joint in root.findall("joint")}
+
+    assert joints["base_to_left_arm"].find("origin").get("xyz") == "0.1 0.2 0.3"
+    assert joints["base_to_left_arm"].find("origin").get("rpy") == "0.01 0.02 0.03"
+    assert joints["base_to_right_arm"].find("origin").get("xyz") == "-0.1 -0.2 -0.3"
+    assert joints["base_to_right_arm"].find("origin").get("rpy") == "-0.01 -0.02 -0.03"
+
+
+def test_yaml_limits_and_mirrored_inertials_are_expanded():
+    root = _expand_robot()
+    joints = {joint.get("name"): joint for joint in root.findall("joint")}
+    links = {link.get("name"): link for link in root.findall("link")}
+
+    expected_limits = {
+        1: (-2.9671, 2.9671, 108.0),
+        2: (-2.0944, 2.0944, 108.0),
+        3: (-2.9671, 2.9671, 66.0),
+        4: (-2.5307, 1.0472, 66.0),
+        5: (-2.9671, 2.9671, 18.0),
+        6: (-1.0472, 1.0472, 18.0),
+        7: (-1.5708, 1.5708, 18.0),
+    }
+    for side in ("L", "R"):
+        for number, expected in expected_limits.items():
+            limit = joints[f"Joint{number}_{side}"].find("limit")
+            actual = tuple(float(limit.get(key)) for key in ("lower", "upper", "effort"))
+            assert actual == expected
+            assert float(limit.get("velocity")) == 3.1416
+
+    left_inertia = links["Link5_L"].find("inertial/inertia")
+    right_inertia = links["Link5_R"].find("inertial/inertia")
+    assert float(left_inertia.get("ixz")) == -float(right_inertia.get("ixz"))
+    assert float(left_inertia.get("iyz")) == -float(right_inertia.get("iyz"))
 
 
 def test_flange_fk_matches_vendor_m6_40_snapshots():

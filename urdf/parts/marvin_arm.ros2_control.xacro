@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <!-- Marvin arm ros2_control block. Exposes 14 arm joints (7 per arm)
-     with reserved position/velocity/effort command interfaces and
-     position/velocity/effort state interfaces.
+     with position command interface and position/velocity/effort state interfaces.
      Defaults to mock_components/GenericSystem for fake-hardware validation. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="marvin_arm_ros2_control"
@@ -24,8 +23,6 @@
       <xacro:macro name="configure_joint" params="joint_name">
         <joint name="${joint_name}">
           <command_interface name="position"/>
-          <command_interface name="velocity"/>
-          <command_interface name="effort"/>
           <state_interface name="position"/>
           <state_interface name="velocity"/>
           <state_interface name="effort"/>

@@ -29,6 +29,7 @@ def robot_state_publisher_spawner(context: LaunchContext):
         "connected_to": context.perform_substitution(connected_to),
         "xyz": context.perform_substitution(xyz),
         "rpy": context.perform_substitution(rpy),
+        "mounts_file": context.perform_substitution(LaunchConfiguration("mounts_file")),
         "ros2_control": "false",
         "use_fake_hardware": "true",
     }
@@ -66,7 +67,7 @@ def robot_state_publisher_spawner(context: LaunchContext):
 def generate_launch_description() -> LaunchDescription:
     share = get_package_share_directory("marvin_description")
     use_rviz = LaunchConfiguration("use_rviz")
-    rviz_config = PathJoinSubstitution([share, "urdf", "rviz2.rviz"])
+    rviz_config = PathJoinSubstitution([share, "rviz", "visualize_marvin.rviz"])
 
     robot_state_publisher_spawner_opaque_function = OpaqueFunction(
         function=robot_state_publisher_spawner
@@ -85,6 +86,12 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("connected_to", default_value="world"),
             DeclareLaunchArgument("xyz", default_value="0 0 0"),
             DeclareLaunchArgument("rpy", default_value="0 0 0"),
+            DeclareLaunchArgument(
+                "mounts_file",
+                default_value=PathJoinSubstitution(
+                    [share, "config", "arm_mounts.yaml"]
+                ),
+            ),
             DeclareLaunchArgument("use_joint_state_gui", default_value="true"),
             DeclareLaunchArgument("use_rviz", default_value="true"),
             DeclareLaunchArgument(

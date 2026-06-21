@@ -5,6 +5,9 @@
        connected_to         Parent link for the base mount (default: world)
        xyz                  Translation offset from connected_to
        rpy                  Rotation offset from connected_to
+       mounts_file          YAML source for the bimanual mounting transforms
+       left_base_xyz/rpy    base_link -> Base_L mounting transform
+       right_base_xyz/rpy   base_link -> Base_R mounting transform
        ros2_control         Whether to include the <ros2_control> block
        use_fake_hardware    Use mock_components/GenericSystem (true) or real plugin
        hardware_plugin      Real ros2_control hardware plugin name
@@ -19,6 +22,12 @@
   <xacro:arg name="connected_to" default="world"/>
   <xacro:arg name="xyz" default="0 0 0"/>
   <xacro:arg name="rpy" default="0 0 0"/>
+  <xacro:arg name="mounts_file" default="$(find marvin_description)/config/arm_mounts.yaml"/>
+  <xacro:property name="arm_mounts" value="${xacro.load_yaml('$(arg mounts_file)')}"/>
+  <xacro:arg name="left_base_xyz" default="${arm_mounts['left_arm']['origin']['xyz']}"/>
+  <xacro:arg name="left_base_rpy" default="${arm_mounts['left_arm']['origin']['rpy']}"/>
+  <xacro:arg name="right_base_xyz" default="${arm_mounts['right_arm']['origin']['xyz']}"/>
+  <xacro:arg name="right_base_rpy" default="${arm_mounts['right_arm']['origin']['rpy']}"/>
   <xacro:arg name="ros2_control" default="true"/>
   <xacro:arg name="use_fake_hardware" default="true"/>
   <xacro:arg name="hardware_plugin" default="marvin_hardware_interface/MarvinBimanualArmHardware"/>
@@ -38,7 +47,11 @@
   <xacro:marvin_bimanual_arm
     connected_to="$(arg connected_to)"
     xyz="$(arg xyz)"
-    rpy="$(arg rpy)"/>
+    rpy="$(arg rpy)"
+    left_base_xyz="$(arg left_base_xyz)"
+    left_base_rpy="$(arg left_base_rpy)"
+    right_base_xyz="$(arg right_base_xyz)"
+    right_base_rpy="$(arg right_base_rpy)"/>
 
   <!-- ros2_control block (conditional) -->
   <xacro:if value="$(arg ros2_control)">
