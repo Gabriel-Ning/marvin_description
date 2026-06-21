@@ -4,12 +4,12 @@ left_arm:
   parent: base_link
   child: Base_L
   origin:
-    xyz: 0 0.037 0.140
+    xyz: 0 0.026 0.070
     rpy: -1.57 0 0
 
 right_arm:
   parent: base_link
   child: Base_R
   origin:
-    xyz: 0 -0.037 0.140
+    xyz: 0 -0.026 0.070
     rpy: 1.57 0 0
