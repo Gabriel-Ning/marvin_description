@@ -7,11 +7,22 @@ No ros2_control, no hardware, no controllers.
 """
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchContext, LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, LogInfo, OpaqueFunction
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 import xacro
+import yaml
+
+
+def _mount_value(config, arm, field):
+    try:
+        value = str(config[arm]["origin"][field])
+    except (KeyError, TypeError) as exc:
+        raise RuntimeError(f"Missing {arm}.origin.{field} in arm mounts YAML") from exc
+    if len(value.split()) != 3:
+        raise RuntimeError(f"{arm}.origin.{field} must contain exactly three values")
+    return value
 
 
 def robot_state_publisher_spawner(context: LaunchContext):
@@ -22,6 +33,15 @@ def robot_state_publisher_spawner(context: LaunchContext):
     rpy = LaunchConfiguration("rpy")
     use_joint_state_gui = LaunchConfiguration("use_joint_state_gui")
     joint_states_topic = LaunchConfiguration("joint_states_topic")
+    mounts_file = context.perform_substitution(LaunchConfiguration("mounts_file"))
+
+    with open(mounts_file, "r", encoding="utf-8") as stream:
+        mounts = yaml.safe_load(stream)
+
+    left_base_xyz = _mount_value(mounts, "left_arm", "xyz")
+    left_base_rpy = _mount_value(mounts, "left_arm", "rpy")
+    right_base_xyz = _mount_value(mounts, "right_arm", "xyz")
+    right_base_rpy = _mount_value(mounts, "right_arm", "rpy")
 
     base_xacro = str(PathJoinSubstitution([share, "urdf", "marvin.urdf.xacro"]).perform(context))
 
@@ -29,7 +49,11 @@ def robot_state_publisher_spawner(context: LaunchContext):
         "connected_to": context.perform_substitution(connected_to),
         "xyz": context.perform_substitution(xyz),
         "rpy": context.perform_substitution(rpy),
-        "mounts_file": context.perform_substitution(LaunchConfiguration("mounts_file")),
+        "mounts_file": mounts_file,
+        "left_base_xyz": left_base_xyz,
+        "left_base_rpy": left_base_rpy,
+        "right_base_xyz": right_base_xyz,
+        "right_base_rpy": right_base_rpy,
         "ros2_control": "false",
         "use_fake_hardware": "true",
     }
@@ -37,6 +61,13 @@ def robot_state_publisher_spawner(context: LaunchContext):
     robot_description = xacro.process_file(base_xacro, mappings=mappings).toprettyxml(indent="  ")
 
     return [
+        LogInfo(
+            msg=(
+                f"Loaded arm mounts from {mounts_file}: "
+                f"left xyz=[{left_base_xyz}] rpy=[{left_base_rpy}], "
+                f"right xyz=[{right_base_xyz}] rpy=[{right_base_rpy}]"
+            )
+        ),
         Node(
             package="robot_state_publisher",
             executable="robot_state_publisher",
