@@ -53,7 +53,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.090" length="1.0"/>
+        <cylinder radius="0.060" length="1.0"/>
       </geometry>
     </visual>
     <collision>
@@ -61,7 +61,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.090" length="1.0"/>
+        <cylinder radius="0.060" length="1.0"/>
       </geometry>
     </collision>
     </link>
